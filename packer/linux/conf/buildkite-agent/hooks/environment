@@ -5,6 +5,13 @@ set -Eeuo pipefail
 handle_err() {
   echo "^^^ +++"
   echo ":alert: Elastic CI Stack environment hook failed" >&2
+
+  if [ "$BUILDKITE_AGENT_ENVIRONMENT_HOOK_FAILURE_DISCONNECT" = "true" ]; then
+    echo "Disconnecting Buildkite agent"
+    # we want to disconnect this agent but not interrupt other running jobs so do it gracefully 
+    systemctl kill --kill-who=main --signal=SIGTERM buildkite-agent
+  fi
+
   exit 53
 }
 
