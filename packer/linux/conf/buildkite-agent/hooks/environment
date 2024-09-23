@@ -54,6 +54,14 @@ if ! /usr/local/bin/bk-check-disk-space.sh; then
   echo "Checking disk space again"
   if ! /usr/local/bin/bk-check-disk-space.sh; then
     echo "Disk health checks failed" >&2
+    
+    if [[ "${DISCONNECT_AGENT_ON_LOW_DISK_SPACE:-false}" == "false" ]]; then
+      echo "Stopping buildkite-agent service to disconnect agent" >&2
+      
+      if ! systemctl stop buildkite-agent; then
+        echo ":alert: Failed to stop buildkite-agent service"
+      fi
+    
     exit 1
   fi
 fi
