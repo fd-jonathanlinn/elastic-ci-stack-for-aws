@@ -50,6 +50,7 @@ Metadata:
         - BuildkiteAgentScalerServerlessARN
         - BuildkiteAgentScalerVersion
         - LogRetentionDays
+        - DisconnectAgentOnLowDiskSpace
 
       - Label:
           default: Network Configuration
@@ -568,8 +569,8 @@ Parameters:
     Description: Optional - Customise the EC2 instance Name tag
     Default: ""
 
-  BuildkiteAgentEnvironmentHookFailureDisconnect:
-    Description: Set to "true" to disconnect the agent if the environment hook fails.
+  DisconnectAgentOnLowDiskSpace:
+    Description: Set to "true" to disconnect the agent if the environment hook fails due Docker's disk space check.
     Type: String
     AllowedValues:
       - "true"
@@ -1305,7 +1306,7 @@ Resources:
                   BUILDKITE_ECR_POLICY="${ECRAccessPolicy}" \
                   BUILDKITE_TERMINATE_INSTANCE_AFTER_JOB="${BuildkiteTerminateInstanceAfterJob}" \
                   BUILDKITE_ADDITIONAL_SUDO_PERMISSIONS="${BuildkiteAdditionalSudoPermissions}" \
-                  BUILDKITE_AGENT_ENVIRONMENT_HOOK_FAILURE_DISCONNECT="${BuildkiteAgentEnvironmentHookFailureDisconnect}" \
+                  DISCONNECT_AGENT_ON_LOW_DISK_SPACE="${DisconnectAgentOnLowDiskSpace}" \
                   AWS_DEFAULT_REGION="${AWS::Region}" \
                   SECRETS_PLUGIN_ENABLED="${EnableSecretsPlugin}" \
                   ECR_PLUGIN_ENABLED="${EnableECRPlugin}" \
