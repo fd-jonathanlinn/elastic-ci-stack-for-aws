@@ -6,10 +6,12 @@ handle_err() {
   echo "^^^ +++"
   echo ":alert: Elastic CI Stack environment hook failed" >&2
 
-  if [ "$BUILDKITE_AGENT_ENVIRONMENT_HOOK_FAILURE_DISCONNECT" = "true" ]; then
-    echo "Disconnecting Buildkite agent"
-    # we want to disconnect this agent but not interrupt other running jobs so do it gracefully 
-    systemctl kill --kill-who=main --signal=SIGTERM buildkite-agent
+  if [[ "${DISCONNECT_AGENT_ON_LOW_DISK_SPACE:-false}" == "false" ]]; then
+    echo "Stopping agent" >&2
+    
+    if ! systemctl stop buildkite-agent; then
+      echo ":alert: Failed to stop buildkite-agent service"
+    fi
   fi
 
   exit 53
@@ -54,14 +56,6 @@ if ! /usr/local/bin/bk-check-disk-space.sh; then
   echo "Checking disk space again"
   if ! /usr/local/bin/bk-check-disk-space.sh; then
     echo "Disk health checks failed" >&2
-    
-    if [[ "${DISCONNECT_AGENT_ON_LOW_DISK_SPACE:-false}" == "false" ]]; then
-      echo "Stopping buildkite-agent service to disconnect agent" >&2
-      
-      if ! systemctl stop buildkite-agent; then
-        echo ":alert: Failed to stop buildkite-agent service"
-      fi
-    
     exit 1
   fi
 fi
