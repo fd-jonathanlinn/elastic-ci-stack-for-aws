@@ -148,8 +148,10 @@ Metadata:
         - ScheduleTimezone
         - ScaleUpSchedule
         - ScaleUpMinSize
+        - ScaleUpMaxSize
         - ScaleDownSchedule
         - ScaleDownMinSize
+        - ScaleDownMaxSize
 
       - Label:
           default: Cost Allocation Configuration
@@ -295,7 +297,7 @@ Parameters:
     Default: "true"
 
   EnableScheduledScaling:
-    Description: Enable scheduled scaling to automatically adjust MinSize based on time-based schedules
+    Description: Enable scheduled scaling to automatically adjust MinSize and MaxSize based on time-based schedules
     Type: String
     AllowedValues:
         - "true"
@@ -319,6 +321,12 @@ Parameters:
     Type: Number
     Default: 1
     MinValue: 0
+  
+  ScaleUpMaxSize:
+    Description: MaxSize to set when the ScaleUpSchedule is triggered (applied at the time specified in ScaleUpSchedule, only used when EnableScheduledScaling is true). Must be greater than MinSize.
+    Type: Number
+    Default: 1
+    MinValue: 0
 
   ScaleDownSchedule:
     Description: "Cron expression for when to scale down (only used when EnableScheduledScaling is true). See AWS documentation for format details: https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-scheduled-scaling.html#scheduled-scaling-cron (\"0 18 * * MON-FRI\" for 6 PM weekdays)"
@@ -331,6 +339,12 @@ Parameters:
     Description: MinSize to set when the ScaleDownSchedule is triggered (applied at the time specified in ScaleDownSchedule, only used when EnableScheduledScaling is true)
     Type: Number
     Default: 0
+    MinValue: 0
+    
+  ScaleDownMaxSize:
+    Description: MaxSize to set when the ScaleDownSchedule is triggered (applied at the time specified in ScaleDownSchedule, only used when EnableScheduledScaling is true). Must be greater than MinSize.
+    Type: Number
+    Default: 1
     MinValue: 0
 
   ScaleOutCooldownPeriod:
@@ -2602,6 +2616,7 @@ Resources:
       ScheduledActionName: !Sub "${AWS::StackName}-ScaleUp"
       Recurrence: !Ref ScaleUpSchedule
       MinSize: !Ref ScaleUpMinSize
+      MaxSize: !Ref ScaleUpMaxSize
       TimeZone: !Ref ScheduleTimezone
 
   ScheduledScaleDownAction:
@@ -2612,6 +2627,7 @@ Resources:
       ScheduledActionName: !Sub "${AWS::StackName}-ScaleDown"
       Recurrence: !Ref ScaleDownSchedule
       MinSize: !Ref ScaleDownMinSize
+      MaxSize: !Ref ScaleDownMaxSize
       TimeZone: !Ref ScheduleTimezone
 
   AsgProcessSuspenderRole:
